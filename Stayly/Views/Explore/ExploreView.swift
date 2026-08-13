@@ -8,21 +8,24 @@ struct ExploreView: View {
             location: "Manali, India",
             price: 4500,
             rating: 4.92,
-            imageName: "cabin"
+            imageName: "cabin",
+            category: "Cabins"
         ),
         Property(
             title: "Beachfront Villa",
             location: "Goa, India",
             price: 6200,
             rating: 4.87,
-            imageName: "beach"
+            imageName: "beach",
+            category: "Beach"
         ),
         Property(
             title: "Luxury City Apartment",
             location: "Mumbai, India",
             price: 3800,
             rating: 4.81,
-            imageName: "city"
+            imageName: "city",
+            category: "Cities"
         )
     ]
     
@@ -33,7 +36,9 @@ struct ExploreView: View {
                     
                     SearchBar()
                     
-                    CategoryScrollView()
+                    CategoryScrollView(
+                        properties: properties
+                    )
                     
                     VStack(alignment: .leading, spacing: 16) {
                         
@@ -41,6 +46,7 @@ struct ExploreView: View {
                             .font(.title2)
                             .fontWeight(.bold)
                             .padding(.leading)
+                        
                         ForEach(properties) { property in
                             PropertyCard(property: property)
                         }

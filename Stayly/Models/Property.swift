@@ -15,4 +15,5 @@ struct Property: Identifiable {
     let price: Int
     let rating: Double
     let imageName: String
+    let category: String
 }

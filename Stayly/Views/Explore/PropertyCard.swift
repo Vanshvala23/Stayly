@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PropertyCard: View {
-    
+    @State private var isFav=false
     let property: Property
     
     var body: some View {
@@ -19,14 +19,18 @@ struct PropertyCard: View {
                     )
                 
                 Button {
+                    withAnimation(.spring(response:0.3,dampingFraction: 0.5)){
+                        isFav.toggle()
+                    }
                     
                 } label: {
-                    Image(systemName: "heart")
+                    Image(systemName: isFav ? "heart.fill":"heart")
                         .font(.title3)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(isFav ? .red:.white)
                         .padding(10)
                         .background(.black.opacity(0.25))
                         .clipShape(Circle())
+                        .scaleEffect(isFav ?1.15:1.0)
                 }
                 .padding(12)
             }
@@ -76,7 +80,8 @@ struct PropertyCard: View {
             location: "Manali, India",
             price: 4500,
             rating: 4.92,
-            imageName: "cabin"
+            imageName: "cabin",
+            category:"Cabins"
         )
     )
     .padding()
