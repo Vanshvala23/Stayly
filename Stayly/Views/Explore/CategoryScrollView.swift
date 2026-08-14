@@ -14,7 +14,6 @@ struct CategoryScrollView: View {
         ("leaf.fill", "Nature")
     ]
     
-    
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 24) {
@@ -76,6 +75,7 @@ struct CategoryView: View {
         .navigationTitle(title)
     }
 }
+
 #Preview {
     NavigationStack {
         CategoryScrollView(
@@ -86,10 +86,22 @@ struct CategoryView: View {
                     price: 4500,
                     rating: 4.92,
                     imageName: "cabin",
-                    category: "Mountains"
+                    category: "Cabins",
+                    description: "Enjoy a peaceful stay surrounded by the beautiful mountains of Manali. This cozy cabin is perfect for relaxing and exploring the area.",
+                    hostName: "Vijay",
+                    reviewCount: 128,
+                    guests: 4,
+                    bedrooms: 2,
+                    beds: 2,
+                    bathrooms: 1,
+                    amenities: [
+                        Amenity(icon: "wifi", name: "Free Wi-Fi"),
+                        Amenity(icon: "car.fill", name: "Free parking"),
+                        Amenity(icon: "fork.knife", name: "Kitchen"),
+                        Amenity(icon: "mountain.2.fill", name: "Mountain view")
+                    ]
                 )
             ]
         )
-        .padding()
     }
 }

@@ -72,6 +72,7 @@ struct PropertyCard: View {
             } label: {
                 VStack(alignment: .leading, spacing: 8) {
                     
+                    // Title + Rating
                     HStack {
                         
                         Text(property.title)
@@ -95,16 +96,23 @@ struct PropertyCard: View {
                         }
                     }
                     
+                    // Location
                     Text(property.location)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     
+                    // Reviews
+                    Text("\(property.reviewCount) reviews")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    // Price
                     HStack(spacing: 4) {
                         
                         Text("₹\(property.price)")
                             .fontWeight(.semibold)
                         
-                        Text("night")
+                        Text("per night")
                             .foregroundStyle(.secondary)
                     }
                     .font(.subheadline)
@@ -130,7 +138,32 @@ struct PropertyCard: View {
                 price: 4500,
                 rating: 4.92,
                 imageName: "cabin",
-                category: "Cabins"
+                category: "Cabins",
+                description: "Enjoy a peaceful stay surrounded by the beautiful mountains of Manali. This cozy cabin is perfect for relaxing and exploring the area.",
+                hostName: "Vijay",
+                reviewCount: 128,
+                guests: 4,
+                bedrooms: 2,
+                beds: 2,
+                bathrooms: 1,
+                amenities: [
+                    Amenity(
+                        icon: "wifi",
+                        name: "Free Wi-Fi"
+                    ),
+                    Amenity(
+                        icon: "car.fill",
+                        name: "Free parking"
+                    ),
+                    Amenity(
+                        icon: "fork.knife",
+                        name: "Kitchen"
+                    ),
+                    Amenity(
+                        icon: "mountain.2.fill",
+                        name: "Mountain view"
+                    )
+                ]
             )
         )
         .padding()
