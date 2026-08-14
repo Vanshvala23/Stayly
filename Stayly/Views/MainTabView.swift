@@ -26,7 +26,7 @@ struct MainTabView: View {
     }
 }
 extension Color{
-    static let staylyPrimary=Color(red:1.0,green:0.22,blue:0.36)
+    static let staylyPrimary=Color(.pink)
 }
 #Preview {
     MainTabView()
