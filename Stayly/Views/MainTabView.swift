@@ -1,14 +1,15 @@
 import SwiftUI
 
 struct MainTabView: View {
+    @StateObject private var favoritesManager = FavoritesManager()
     var body: some View {
         TabView {
-            ExploreView()
+            ExploreView(properties: staylyProperties)
                 .tabItem {
                     Label("Explore", systemImage: "magnifyingglass")
                 }
 
-            FavoritesView()
+            FavoritesView(properties: staylyProperties)
                 .tabItem {
                     Label("Favorites", systemImage: "heart")
                 }
@@ -22,7 +23,7 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Profile", systemImage: "person")
                 }
-        }.tint(Color.staylyPrimary)
+        }.tint(Color.staylyPrimary).environmentObject(favoritesManager)
     }
 }
 extension Color{
