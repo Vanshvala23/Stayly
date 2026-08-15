@@ -54,16 +54,6 @@ struct SearchBar: View {
                     }
                     .buttonStyle(.plain)
                 }
-                
-                if !showSearchPanel {
-                    Image(systemName: "slider.horizontal.3")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.primary)
-                        .padding(10)
-                        .background(.quaternary.opacity(0.35))
-                        .clipShape(Circle())
-                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
