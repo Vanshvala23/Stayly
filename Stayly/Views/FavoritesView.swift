@@ -14,7 +14,6 @@ struct FavoritesView: View {
     
     var body: some View {
         NavigationStack {
-            
             Group {
                 if favoriteProperties.isEmpty {
                     
@@ -30,8 +29,15 @@ struct FavoritesView: View {
                     
                     ScrollView {
                         LazyVStack(spacing: 20) {
+                            
                             ForEach(favoriteProperties) { property in
-                                PropertyCard(property: property)
+                                
+                                NavigationLink {
+                                    PropertyDetailView(property: property)
+                                } label: {
+                                    PropertyCard(property: property)
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                         .padding()

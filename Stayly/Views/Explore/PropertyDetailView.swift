@@ -4,7 +4,7 @@ struct PropertyDetailView: View {
     
     let property: Property
     
-    @State private var isFavorite = false
+    @EnvironmentObject var favouritesManager: FavoritesManager
     
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -25,6 +25,8 @@ struct PropertyDetailView: View {
                     
                     HStack(spacing: 10) {
                         
+                        // MARK: Share Button
+                        
                         ShareLink(
                             item: "\(property.title) - \(property.location)"
                         ) {
@@ -40,6 +42,8 @@ struct PropertyDetailView: View {
                             .clipShape(Circle())
                         }
                         
+                        // MARK: Favorite Button
+                        
                         Button {
                             withAnimation(
                                 .spring(
@@ -47,17 +51,19 @@ struct PropertyDetailView: View {
                                     dampingFraction: 0.6
                                 )
                             ) {
-                                isFavorite.toggle()
+                                favouritesManager.toggleFavorite(property)
                             }
                         } label: {
                             Image(
-                                systemName: isFavorite
+                                systemName: favouritesManager.isFavorite(property)
                                 ? "heart.fill"
                                 : "heart"
                             )
                             .font(.title3)
                             .foregroundStyle(
-                                isFavorite ? .red : .white
+                                favouritesManager.isFavorite(property)
+                                ? .red
+                                : .white
                             )
                             .frame(width: 42, height: 42)
                             .background(
@@ -73,12 +79,12 @@ struct PropertyDetailView: View {
                 
                 VStack(alignment: .leading, spacing: 24) {
                     
-                    // Title
+                    // MARK: Title
+                    
                     VStack(
                         alignment: .leading,
                         spacing: 8
                     ) {
-                        
                         Text(property.title)
                             .font(.title)
                             .fontWeight(.bold)
@@ -88,7 +94,6 @@ struct PropertyDetailView: View {
                             )
                         
                         HStack(spacing: 6) {
-                            
                             Image(
                                 systemName: "mappin.and.ellipse"
                             )
@@ -102,9 +107,9 @@ struct PropertyDetailView: View {
                         .foregroundStyle(.secondary)
                     }
                     
-                    // Rating
+                    // MARK: Rating
+                    
                     HStack(spacing: 6) {
-                        
                         Image(systemName: "star.fill")
                             .foregroundStyle(.yellow)
                         
@@ -127,7 +132,7 @@ struct PropertyDetailView: View {
                     
                     Divider()
                     
-                    // MARK: - Property Stats
+                    // MARK: Property Stats
                     
                     LazyVGrid(
                         columns: [
@@ -138,7 +143,6 @@ struct PropertyDetailView: View {
                         ],
                         spacing: 16
                     ) {
-                        
                         PropertyStat(
                             icon: "person.2.fill",
                             value: "\(property.guests)",
@@ -167,10 +171,9 @@ struct PropertyDetailView: View {
                     
                     Divider()
                     
-                    // MARK: - Host
+                    // MARK: Host
                     
                     HStack(spacing: 12) {
-                        
                         Image(
                             systemName: "person.circle.fill"
                         )
@@ -181,7 +184,6 @@ struct PropertyDetailView: View {
                             alignment: .leading,
                             spacing: 4
                         ) {
-                            
                             Text(
                                 "Hosted by \(property.hostName)"
                             )
@@ -197,13 +199,12 @@ struct PropertyDetailView: View {
                     
                     Divider()
                     
-                    // MARK: - About
+                    // MARK: About
                     
                     VStack(
                         alignment: .leading,
                         spacing: 10
                     ) {
-                        
                         Text("About this place")
                             .font(.title3)
                             .fontWeight(.semibold)
@@ -219,13 +220,12 @@ struct PropertyDetailView: View {
                     
                     Divider()
                     
-                    // MARK: - Amenities
+                    // MARK: Amenities
                     
                     VStack(
                         alignment: .leading,
                         spacing: 16
                     ) {
-                        
                         Text("What this place offers")
                             .font(.title3)
                             .fontWeight(.semibold)
@@ -238,14 +238,11 @@ struct PropertyDetailView: View {
                             alignment: .leading,
                             spacing: 18
                         ) {
-                            
                             ForEach(
                                 property.amenities,
                                 id: \.name
                             ) { amenity in
-                                
                                 HStack(spacing: 10) {
-                                    
                                     Image(
                                         systemName: amenity.icon
                                     )
@@ -263,19 +260,17 @@ struct PropertyDetailView: View {
                     
                     Divider()
                     
-                    // MARK: - Reviews
+                    // MARK: Reviews
                     
                     VStack(
                         alignment: .leading,
                         spacing: 16
                     ) {
-                        
                         Text("Guest reviews")
                             .font(.title3)
                             .fontWeight(.semibold)
                         
                         HStack(spacing: 6) {
-                            
                             Image(systemName: "star.fill")
                                 .foregroundStyle(.yellow)
                             
@@ -300,7 +295,6 @@ struct PropertyDetailView: View {
                             alignment: .leading,
                             spacing: 8
                         ) {
-                            
                             Text(
                                 "“Beautiful property with amazing views. "
                                 + "The place was clean, comfortable, and "
@@ -317,19 +311,17 @@ struct PropertyDetailView: View {
                     
                     Divider()
                     
-                    // MARK: - Location
+                    // MARK: Location
                     
                     VStack(
                         alignment: .leading,
                         spacing: 12
                     ) {
-                        
                         Text("Where you'll be")
                             .font(.title3)
                             .fontWeight(.semibold)
                         
                         HStack(spacing: 8) {
-                            
                             Image(
                                 systemName: "mappin.and.ellipse"
                             )
@@ -348,9 +340,7 @@ struct PropertyDetailView: View {
                             maxHeight: 180
                         )
                         .overlay {
-                            
                             VStack(spacing: 8) {
-                                
                                 Image(
                                     systemName: "map.fill"
                                 )
@@ -387,12 +377,10 @@ struct PropertyDetailView: View {
     
     private var reservationBar: some View {
         HStack(spacing: 16) {
-            
             VStack(
                 alignment: .leading,
                 spacing: 3
             ) {
-                
                 Text("₹\(property.price)")
                     .font(.title3)
                     .fontWeight(.bold)
@@ -404,20 +392,16 @@ struct PropertyDetailView: View {
             
             Spacer(minLength: 0)
             
-            Button {
-                // Reservation action
-            } label: {
+            NavigationLink{
+                BookingView(property: property)
+            }label:{
                 Text("Reserve")
                     .fontWeight(.semibold)
                     .foregroundStyle(.white)
-                    .padding(.horizontal, 28)
-                    .padding(.vertical, 14)
+                    .padding(.horizontal,28)
+                    .padding(.vertical,14)
                     .background(.tint)
-                    .clipShape(
-                        RoundedRectangle(
-                            cornerRadius: 14
-                        )
-                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
             }
         }
         .padding(.horizontal, 20)
@@ -440,7 +424,6 @@ struct PropertyStat: View {
     
     var body: some View {
         VStack(spacing: 6) {
-            
             Image(systemName: icon)
                 .font(.headline)
             
@@ -457,49 +440,54 @@ struct PropertyStat: View {
         )
     }
 }
-#Preview{
-NavigationStack {
-    PropertyDetailView(
-                property: Property(
-                    title: "Modern Mountain Cabin",
-                    location: "Manali, India",
-                    price: 4500,
-                    rating: 4.92,
-                    imageName: "cabin",
-                    category: "Cabins",
-                    description: "Enjoy a peaceful stay surrounded by the beautiful mountains of Manali. This cozy cabin is perfect for relaxing, exploring the area, and spending quality time away from the city.",
-                    hostName: "Vijay",
-                    reviewCount: 128,
-                    guests: 4,
-                    bedrooms: 2,
-                    beds: 2,
-                    bathrooms: 1,
-                    amenities: [
-                        Amenity(
-                            icon: "wifi",
-                            name: "Free Wi-Fi"
-                        ),
-                        Amenity(
-                            icon: "car.fill",
-                            name: "Free parking"
-                        ),
-                        Amenity(
-                            icon: "fork.knife",
-                            name: "Kitchen"
-                        ),
-                        Amenity(
-                            icon: "snowflake",
-                            name: "Air conditioning"
-                        ),
-                        Amenity(
-                            icon: "mountain.2.fillname:", name:"Mountain view"
-                        ),
-                        Amenity(
-                            icon: "laptopcomputer",
-                            name: "Workspace"
-                        )
-                    ]
-                )
+
+// MARK: - Preview
+
+#Preview {
+    NavigationStack {
+        PropertyDetailView(
+            property: Property(
+                title: "Modern Mountain Cabin",
+                location: "Manali, India",
+                price: 4500,
+                rating: 4.92,
+                imageName: "cabin",
+                category: "Cabins",
+                description: "Enjoy a peaceful stay surrounded by the beautiful mountains of Manali. This cozy cabin is perfect for relaxing, exploring the area, and spending quality time away from the city.",
+                hostName: "Vijay",
+                reviewCount: 128,
+                guests: 4,
+                bedrooms: 2,
+                beds: 2,
+                bathrooms: 1,
+                amenities: [
+                    Amenity(
+                        icon: "wifi",
+                        name: "Free Wi-Fi"
+                    ),
+                    Amenity(
+                        icon: "car.fill",
+                        name: "Free parking"
+                    ),
+                    Amenity(
+                        icon: "fork.knife",
+                        name: "Kitchen"
+                    ),
+                    Amenity(
+                        icon: "snowflake",
+                        name: "Air conditioning"
+                    ),
+                    Amenity(
+                        icon: "mountain.2.fill",
+                        name: "Mountain view"
+                    ),
+                    Amenity(
+                        icon: "laptopcomputer",
+                        name: "Workspace"
+                    )
+                ]
             )
-}
+        )
+        .environmentObject(FavoritesManager())
+    }
 }

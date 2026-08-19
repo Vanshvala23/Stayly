@@ -2,7 +2,7 @@ import SwiftUI
 
 struct PropertyCard: View {
     
-    @State private var isFav = false
+    @EnvironmentObject var favouritesManager:FavoritesManager
     
     let property: Property
     
@@ -39,17 +39,17 @@ struct PropertyCard: View {
                             dampingFraction: 0.5
                         )
                     ) {
-                        isFav.toggle()
+                        favouritesManager.toggleFavorite(property)
                     }
                 } label: {
                     Image(
-                        systemName: isFav
+                        systemName: favouritesManager.isFavorite(property)
                         ? "heart.fill"
                         : "heart"
                     )
                     .font(.title3)
                     .foregroundStyle(
-                        isFav ? .red : .white
+                        favouritesManager.isFavorite(property) ? .red : .white
                     )
                     .padding(10)
                     .background(
@@ -57,7 +57,7 @@ struct PropertyCard: View {
                     )
                     .clipShape(Circle())
                     .scaleEffect(
-                        isFav ? 1.15 : 1.0
+                        favouritesManager.isFavorite(property) ? 1.15 : 1.0
                     )
                 }
                 .padding(12)
@@ -167,5 +167,6 @@ struct PropertyCard: View {
             )
         )
         .padding()
+        .environmentObject(FavoritesManager())
     }
 }

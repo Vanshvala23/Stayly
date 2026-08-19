@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainTabView: View {
     @StateObject private var favoritesManager = FavoritesManager()
+    @StateObject private var bookingManager=BookingManager()
     var body: some View {
         TabView {
             ExploreView(properties: staylyProperties)
@@ -24,6 +25,7 @@ struct MainTabView: View {
                     Label("Profile", systemImage: "person")
                 }
         }.tint(Color.staylyPrimary).environmentObject(favoritesManager)
+            .environmentObject(bookingManager)
     }
 }
 extension Color{
