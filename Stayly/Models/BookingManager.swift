@@ -13,6 +13,7 @@ final class BookingManager: ObservableObject {
     
     init() {
         loadBookings()
+        updateBookingStatuses()
     }
     
     // MARK: - Add Booking
@@ -24,6 +25,7 @@ final class BookingManager: ObservableObject {
         checkOut: Date,
         adults: Int,
         children: Int,
+        guests:[Guest],
         totalPrice: Int
     ) -> Booking {
         
@@ -33,11 +35,11 @@ final class BookingManager: ObservableObject {
             checkOut: checkOut,
             adults: adults,
             children: children,
+            guests:guests,
             totalPrice: totalPrice
         )
         
         bookings.append(booking)
-        
         saveBookings()
         
         return booking
@@ -45,11 +47,39 @@ final class BookingManager: ObservableObject {
     
     // MARK: - Cancel Booking
     
-    func cancelBooking(
-        _ booking: Booking
-    ) {
-        bookings.removeAll {
-            $0.id == booking.id
+    func cancelBooking(_ booking: Booking) {
+        
+        guard let index = bookings.firstIndex(
+            where: { $0.id == booking.id }
+        ) else {
+            return
+        }
+        
+        bookings[index].status = .cancelled
+        
+        saveBookings()
+    }
+    
+    // MARK: - Delete cancelled Booking
+    
+    func deleteBooking(_ booking:Booking){
+        bookings.removeAll{ $0.id == booking.id}
+        saveBookings()
+    }
+    
+    // MARK: - Update Booking Status
+    
+    func updateBookingStatuses() {
+        
+        let now = Date()
+        
+        for index in bookings.indices {
+            
+            if bookings[index].status == .upcoming &&
+                bookings[index].checkOut <= now {
+                
+                bookings[index].status = .completed
+            }
         }
         
         saveBookings()
@@ -58,6 +88,7 @@ final class BookingManager: ObservableObject {
     // MARK: - Save Bookings
     
     private func saveBookings() {
+        
         do {
             let data = try JSONEncoder().encode(bookings)
             
@@ -76,6 +107,7 @@ final class BookingManager: ObservableObject {
     // MARK: - Load Bookings
     
     private func loadBookings() {
+        
         guard let data = UserDefaults.standard.data(
             forKey: storageKey
         ) else {
@@ -87,6 +119,7 @@ final class BookingManager: ObservableObject {
                 [Booking].self,
                 from: data
             )
+            
         } catch {
             print(
                 "Failed to load bookings: \(error)"

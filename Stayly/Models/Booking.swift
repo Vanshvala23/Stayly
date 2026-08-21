@@ -1,6 +1,12 @@
 import Foundation
 
-struct Booking: Identifiable, Codable,Hashable {
+enum BookingStatus: String, Codable, Hashable {
+    case upcoming
+    case completed
+    case cancelled
+}
+
+struct Booking: Identifiable, Codable, Hashable {
     
     let id: UUID
     let property: Property
@@ -8,8 +14,11 @@ struct Booking: Identifiable, Codable,Hashable {
     let checkOut: Date
     let adults: Int
     let children: Int
+    let guests:[Guest]
     let totalPrice: Int
     let bookingDate: Date
+    
+    var status: BookingStatus
     
     // MARK: - Coding Keys
     
@@ -20,8 +29,10 @@ struct Booking: Identifiable, Codable,Hashable {
         case checkOut
         case adults
         case children
+        case guests
         case totalPrice
         case bookingDate
+        case status
     }
     
     // MARK: - Create Booking
@@ -32,6 +43,7 @@ struct Booking: Identifiable, Codable,Hashable {
         checkOut: Date,
         adults: Int,
         children: Int,
+        guests:[Guest],
         totalPrice: Int
     ) {
         self.id = UUID()
@@ -40,13 +52,16 @@ struct Booking: Identifiable, Codable,Hashable {
         self.checkOut = checkOut
         self.adults = adults
         self.children = children
+        self.guests = guests
         self.totalPrice = totalPrice
         self.bookingDate = Date()
+        self.status = .upcoming
     }
     
     // MARK: - Decode
     
     init(from decoder: Decoder) throws {
+        
         let container = try decoder.container(
             keyedBy: CodingKeys.self
         )
@@ -81,6 +96,8 @@ struct Booking: Identifiable, Codable,Hashable {
             forKey: .children
         )
         
+        guests=try container.decodeIfPresent([Guest].self, forKey: .guests) ?? []
+        
         totalPrice = try container.decode(
             Int.self,
             forKey: .totalPrice
@@ -90,6 +107,12 @@ struct Booking: Identifiable, Codable,Hashable {
             Date.self,
             forKey: .bookingDate
         )
+        
+        // Backward compatibility with existing saved bookings
+        status = try container.decodeIfPresent(
+            BookingStatus.self,
+            forKey: .status
+        ) ?? .upcoming
     }
     
     // MARK: - Guests
@@ -101,6 +124,7 @@ struct Booking: Identifiable, Codable,Hashable {
     // MARK: - Nights
     
     var numberOfNights: Int {
+        
         let calendar = Calendar.current
         
         return max(

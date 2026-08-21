@@ -4,9 +4,17 @@ struct BookingView: View {
     
     let property: Property
     
+    @EnvironmentObject private var tabNavigationManager: TabNavigationManager
     @EnvironmentObject private var bookingManager: BookingManager
+    @Environment(\.dismiss) private var dismiss
     
-    @State private var confirmedBooking: Booking?
+    // MARK: - Navigation
+    
+    @State private var showingGuestDetails = false
+    
+    // MARK: - Booking State
+    
+    @State private var guests: [Guest] = []
     
     @State private var checkIn = Calendar.current.date(
         byAdding: .day,
@@ -32,9 +40,7 @@ struct BookingView: View {
     // MARK: - Nights
     
     private var numberOfNights: Int {
-        let calendar = Calendar.current
-        
-        let components = calendar.dateComponents(
+        let components = Calendar.current.dateComponents(
             [.day],
             from: checkIn,
             to: checkOut
@@ -61,9 +67,7 @@ struct BookingView: View {
     }
     
     private var serviceFee: Int {
-        Int(
-            Double(subtotal) * 0.10
-        )
+        Int(Double(subtotal) * 0.10)
     }
     
     private var totalPrice: Int {
@@ -74,27 +78,19 @@ struct BookingView: View {
     
     var body: some View {
         NavigationStack {
+            
             ScrollView {
                 VStack(
                     alignment: .leading,
                     spacing: 24
                 ) {
-                    
-                    // MARK: Property
-                    
                     propertySection
                     
                     Divider()
                     
-                    // MARK: Dates
-                    
                     datesSection
                     
-                    // MARK: Guests
-                    
                     guestsSection
-                    
-                    // MARK: Price Details
                     
                     priceSection
                 }
@@ -103,14 +99,28 @@ struct BookingView: View {
             .navigationTitle("Reserve")
             .navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom) {
-                confirmButton
+                continueButton
             }
             .navigationDestination(
-                item: $confirmedBooking
-            ) { booking in
-                BookingConfirmationView(
-                    booking: booking
-                )
+                isPresented: $showingGuestDetails
+            ) {
+                GuestDetailsView(
+                    adults: adults,
+                    children: children
+                ) { enteredGuests in
+                    
+                    print("GUESTS RECEIVED:", enteredGuests)
+                    
+                    // Save the guests.
+                    guests = enteredGuests
+                    
+                    print("SAVED GUESTS:", guests)
+                    
+                    // Create the booking immediately.
+                    createBooking(
+                        with: enteredGuests
+                    )
+                }
             }
         }
     }
@@ -186,9 +196,7 @@ struct BookingView: View {
                     displayedComponents: .date
                 )
                 .padding(.vertical, 8)
-                .onChange(
-                    of: checkIn
-                ) { _, newCheckIn in
+                .onChange(of: checkIn) { _, newCheckIn in
                     
                     if checkOut <= newCheckIn {
                         checkOut = Calendar.current.date(
@@ -319,18 +327,11 @@ struct BookingView: View {
             
             HStack(spacing: 16) {
                 
-                // MARK: Minus
-                
                 Button {
-                    
-                    guard value.wrappedValue > minimum else {
-                        return
+                    if value.wrappedValue > minimum {
+                        value.wrappedValue -= 1
                     }
-                    
-                    value.wrappedValue -= 1
-                    
                 } label: {
-                    
                     Image(systemName: "minus")
                         .font(.subheadline)
                         .fontWeight(.semibold)
@@ -345,22 +346,13 @@ struct BookingView: View {
                 }
                 .buttonStyle(.plain)
                 
-                // MARK: Value
-                
-                Text(
-                    "\(value.wrappedValue)"
-                )
-                .fontWeight(.semibold)
-                .frame(minWidth: 20)
-                
-                // MARK: Plus
+                Text("\(value.wrappedValue)")
+                    .fontWeight(.semibold)
+                    .frame(minWidth: 20)
                 
                 Button {
-                    
                     value.wrappedValue += 1
-                    
                 } label: {
-                    
                     Image(systemName: "plus")
                         .font(.subheadline)
                         .fontWeight(.semibold)
@@ -411,7 +403,6 @@ struct BookingView: View {
                 Divider()
                 
                 HStack {
-                    
                     Text("Total")
                         .fontWeight(.bold)
                     
@@ -432,7 +423,6 @@ struct BookingView: View {
     ) -> some View {
         
         HStack {
-            
             Text(title)
             
             Spacer()
@@ -443,37 +433,28 @@ struct BookingView: View {
         .font(.subheadline)
     }
     
-    // MARK: - Confirm Button
+    // MARK: - Continue Button
     
-    private var confirmButton: some View {
+    private var continueButton: some View {
         Button {
             
-            let booking = bookingManager.addBooking(
-                property: property,
-                checkIn: checkIn,
-                checkOut: checkOut,
-                adults: adults,
-                children: children,
-                totalPrice: totalPrice
-            )
+            print("OPENING GUEST DETAILS")
             
-            confirmedBooking = booking
+            showingGuestDetails = true
             
         } label: {
             
-            Text(
-                "Confirm Reservation · ₹\(totalPrice)"
-            )
-            .fontWeight(.semibold)
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(.tint)
-            .clipShape(
-                RoundedRectangle(
-                    cornerRadius: 16
+            Text("Continue · ₹\(totalPrice)")
+                .fontWeight(.semibold)
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(.tint)
+                .clipShape(
+                    RoundedRectangle(
+                        cornerRadius: 16
+                    )
                 )
-            )
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
@@ -481,5 +462,40 @@ struct BookingView: View {
         .overlay(alignment: .top) {
             Divider()
         }
+    }
+    
+    // MARK: - Create Booking
+    
+    private func createBooking(
+        with guests: [Guest]
+    ) {
+        
+        print("CREATING BOOKING")
+        print("GUESTS:", guests)
+        print("ADULTS:", adults)
+        print("CHILDREN:", children)
+        print("CHECK-IN:", checkIn)
+        print("CHECK-OUT:", checkOut)
+        print("NIGHTS:", numberOfNights)
+        print("TOTAL PRICE:", totalPrice)
+        
+        // Save booking.
+        bookingManager.addBooking(
+            property: property,
+            checkIn: checkIn,
+            checkOut: checkOut,
+            adults: adults,
+            children: children,
+            guests: guests,
+            totalPrice: totalPrice
+        )
+        
+        print("BOOKING SAVED")
+        
+        // Close BookingView.
+        dismiss()
+        
+        // Switch to Trips.
+        tabNavigationManager.goToTrips()
     }
 }

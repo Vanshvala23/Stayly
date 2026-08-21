@@ -8,9 +8,12 @@ struct TripDetailView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var showingCancelConfirmation = false
+    @State private var showingDeleteConfirmation = false
     
     var body: some View {
+        
         ScrollView {
+            
             VStack(
                 alignment: .leading,
                 spacing: 24
@@ -36,13 +39,21 @@ struct TripDetailView: View {
                 
                 guestsSection
                 
+                // MARK: - Names
+                
+                guestNamesSection
+                
                 // MARK: - Price
                 
                 priceSection
                 
-                // MARK: - Cancel Reservation
+                // MARK: - Reservation Action
                 
-                cancelButton
+                if booking.status == .upcoming {
+                    cancelButton
+                } else if booking.status == .cancelled {
+                    deleteButton
+                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
@@ -52,6 +63,9 @@ struct TripDetailView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Trip Details")
         .navigationBarTitleDisplayMode(.inline)
+        
+        // MARK: - Cancel Confirmation
+        
         .confirmationDialog(
             "Cancel Reservation?",
             isPresented: $showingCancelConfirmation,
@@ -74,18 +88,49 @@ struct TripDetailView: View {
             }
             
         } message: {
+            
             Text(
                 "Are you sure you want to cancel your stay at \(booking.property.title)?"
+            )
+        }
+        
+        // MARK: - Delete Confirmation
+        
+        .confirmationDialog(
+            "Delete Cancelled Trip?",
+            isPresented: $showingDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            
+            Button(
+                "Delete Trip",
+                role: .destructive
+            ) {
+                bookingManager.deleteBooking(booking)
+                dismiss()
+            }
+            
+            Button(
+                "Keep Trip",
+                role: .cancel
+            ) {
+                // Nothing to do.
+            }
+            
+        } message: {
+            
+            Text(
+                "This will permanently remove this cancelled trip from your history."
             )
         }
     }
     
     // MARK: - Property Image
     
-    // MARK: - Property Image
-
     private var propertyImage: some View {
+        
         GeometryReader { geometry in
+            
             Image(booking.property.imageName)
                 .resizable()
                 .scaledToFill()
@@ -95,7 +140,10 @@ struct TripDetailView: View {
                 )
                 .clipped()
         }
-        .aspectRatio(1 / 0.68, contentMode: .fit)
+        .aspectRatio(
+            1 / 0.68,
+            contentMode: .fit
+        )
         .clipShape(
             RoundedRectangle(
                 cornerRadius: 24,
@@ -107,6 +155,7 @@ struct TripDetailView: View {
     // MARK: - Property Information
     
     private var propertyInformation: some View {
+        
         VStack(
             alignment: .leading,
             spacing: 10
@@ -169,27 +218,28 @@ struct TripDetailView: View {
     // MARK: - Reservation Status
     
     private var reservationStatus: some View {
+        
         HStack(
             alignment: .center,
             spacing: 12
         ) {
             
             Image(
-                systemName: "checkmark.circle.fill"
+                systemName: statusIcon
             )
             .font(.title3)
-            .foregroundStyle(.green)
+            .foregroundStyle(statusColor)
             
             VStack(
                 alignment: .leading,
                 spacing: 3
             ) {
                 
-                Text("Reservation confirmed")
+                Text(statusTitle)
                     .font(.subheadline)
                     .fontWeight(.semibold)
                 
-                Text("Your stay is booked")
+                Text(statusMessage)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -205,13 +255,78 @@ struct TripDetailView: View {
             RoundedRectangle(
                 cornerRadius: 16
             )
-            .fill(.green.opacity(0.10))
+            .fill(statusColor.opacity(0.10))
         )
+    }
+    
+    // MARK: - Status Title
+    
+    private var statusTitle: String {
+        
+        switch booking.status {
+        case .upcoming:
+            return "Reservation confirmed"
+            
+        case .completed:
+            return "Stay completed"
+            
+        case .cancelled:
+            return "Reservation cancelled"
+        }
+    }
+    
+    // MARK: - Status Message
+    
+    private var statusMessage: String {
+        
+        switch booking.status {
+        case .upcoming:
+            return "Your stay is booked"
+            
+        case .completed:
+            return "Thanks for staying with Stayly"
+            
+        case .cancelled:
+            return "This reservation has been cancelled"
+        }
+    }
+    
+    // MARK: - Status Icon
+    
+    private var statusIcon: String {
+        
+        switch booking.status {
+        case .upcoming:
+            return "checkmark.circle.fill"
+            
+        case .completed:
+            return "checkmark.seal.fill"
+            
+        case .cancelled:
+            return "xmark.circle.fill"
+        }
+    }
+    
+    // MARK: - Status Color
+    
+    private var statusColor: Color {
+        
+        switch booking.status {
+        case .upcoming:
+            return .green
+            
+        case .completed:
+            return .blue
+            
+        case .cancelled:
+            return .red
+        }
     }
     
     // MARK: - Trip Dates
     
     private var tripDates: some View {
+        
         VStack(
             alignment: .leading,
             spacing: 14
@@ -221,9 +336,7 @@ struct TripDetailView: View {
                 .font(.title3)
                 .fontWeight(.semibold)
             
-            ViewThatFits(
-                in: .horizontal
-            ) {
+            ViewThatFits(in: .horizontal) {
                 
                 // MARK: Wide Layout
                 
@@ -326,14 +439,8 @@ struct TripDetailView: View {
                 vertical: .center
             )
         )
-        .padding(
-            .vertical,
-            14
-        )
-        .padding(
-            .horizontal,
-            12
-        )
+        .padding(.vertical, 14)
+        .padding(.horizontal, 12)
         .background(
             RoundedRectangle(
                 cornerRadius: 14
@@ -345,6 +452,7 @@ struct TripDetailView: View {
     // MARK: - Guests Section
     
     private var guestsSection: some View {
+        
         VStack(
             alignment: .leading,
             spacing: 14
@@ -404,6 +512,7 @@ struct TripDetailView: View {
     // MARK: - Guest Description
     
     private var guestDescription: some View {
+        
         Group {
             
             if booking.children > 0 {
@@ -432,9 +541,84 @@ struct TripDetailView: View {
         )
     }
     
+    // MARK: - Guest Names
+
+    private var guestNamesSection: some View {
+
+        VStack(
+            alignment: .leading,
+            spacing: 14
+        ) {
+
+            Text("Guest details")
+                .font(.title3)
+                .fontWeight(.semibold)
+
+            VStack(spacing: 0) {
+
+                ForEach(
+                    Array(booking.guests.enumerated()),
+                    id: \.element.id
+                ) { index, guest in
+
+                    HStack(
+                        alignment: .center,
+                        spacing: 14
+                    ) {
+
+                        Image(systemName: "person.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(.tint)
+                            .frame(
+                                width: 40,
+                                height: 40
+                            )
+                            .background(
+                                Circle()
+                                    .fill(.tint.opacity(0.12))
+                            )
+
+                        VStack(
+                            alignment: .leading,
+                            spacing: 3
+                        ) {
+
+                            Text(guest.name)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+
+                            Text(
+                                index < booking.adults
+                                ? "Adult"
+                                : "Child"
+                            )
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+                    }
+                    .padding(16)
+
+                    if index < booking.guests.count - 1 {
+                        Divider()
+                            .padding(.leading, 70)
+                    }
+                }
+            }
+            .background(
+                RoundedRectangle(
+                    cornerRadius: 16
+                )
+                .fill(.background)
+            )
+        }
+    }
+    
     // MARK: - Price Section
     
     private var priceSection: some View {
+        
         VStack(
             alignment: .leading,
             spacing: 14
@@ -504,6 +688,7 @@ struct TripDetailView: View {
     // MARK: - Cancel Button
     
     private var cancelButton: some View {
+        
         Button(role: .destructive) {
             showingCancelConfirmation = true
         } label: {
@@ -515,6 +700,33 @@ struct TripDetailView: View {
                 )
                 
                 Text("Cancel Reservation")
+                    .fontWeight(.semibold)
+            }
+            .frame(
+                maxWidth: .infinity
+            )
+            .padding(.vertical, 16)
+        }
+        .buttonStyle(.bordered)
+        .tint(.red)
+        .padding(.top, 4)
+    }
+    
+    // MARK: - Delete Button
+    
+    private var deleteButton: some View {
+        
+        Button(role: .destructive) {
+            showingDeleteConfirmation = true
+        } label: {
+            
+            HStack(spacing: 8) {
+                
+                Image(
+                    systemName: "trash"
+                )
+                
+                Text("Delete Trip")
                     .fontWeight(.semibold)
             }
             .frame(
