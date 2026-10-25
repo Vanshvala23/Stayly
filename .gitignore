@@ -46,3 +46,10 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+#Firebase
+/ios/Runner/GoogleService-Info.plist
+/ios/Runner/Info.plist
+/firebase.json
+#Flutter
+/.dart_tool/
+/.pub-cache/
