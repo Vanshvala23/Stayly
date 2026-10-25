@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "324718617806",
+    "project_id": "stayly-d5f51",
+    "storage_bucket": "stayly-d5f51.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:324718617806:android:8826832c81f1261059dc9f",
+        "android_client_info": {
+          "package_name": "com.example.stayly"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhWMjwvIk4PAnCLr2EFRAvgBhIrT43L0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
