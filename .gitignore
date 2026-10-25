@@ -53,3 +53,5 @@ app.*.map.json
 #Flutter
 /.dart_tool/
 /.pub-cache/
+#envs
+.env
